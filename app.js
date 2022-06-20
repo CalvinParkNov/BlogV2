@@ -7,21 +7,37 @@ const _ = require("lodash");
 const mongoose = require("mongoose");
 // const ck = require('@ckeditor/ckeditor5-build-classic');
 
-
-
-
 const app = express();
 
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
-mongoose.connect('mongodb+srv://calvinpark:aHZAhLRJW71mT2fC@cluster1.zb1pc53.mongodb.net/Blog');
+mongoose.connect(
+    'mongodb+srv://calvinpark:aHZAhLRJW71mT2fC@cluster1.zb1pc53.mongodb.net/Blog'
+);
+
+const blogSchema = {
+    title: {
+        type: String,
+        require: [1, "Title is required!"]
+    },
+    body: {
+        type: String,
+        require: [1, "Body is required!"]
+    }
+}
+
+const Blog = mongoose.model("Blog", blogSchema);
 
 let posts = [];
 
 app.get("/", function (req, res) {
-   res.render("home");
+    Blog.find({}, (error, foundBlog) => {
+        res.render("home", {
+          posts: foundBlog
+        });
+    })
 });
 
 app.get("/about", function (req, res) {
@@ -37,29 +53,28 @@ app.get("/compose", function (req, res) {
 });
 
 app.post("/compose", function (req, res) {
-    const post = {
-        title: req.body.postTitle,
-        content: req.body.postBody
-    };
+    const title = req.body.postTitle;
+    const body = req.body.postBody;
 
-    posts.push(post);
+    const blog = new Blog({title: title, body: body});
+    blog.save();
 
     res.redirect("/");
 
 });
 
-app.get("/posts/:postName", function (req, res) {
-    const requestedTitle = _.lowerCase(req.params.postName);
 
-    posts.forEach(function (post) {
-        const storedTitle = _.lowerCase(post.title);
+app.get("/posts/:postId", function (req, res) {
+    const requestedId = _.lowerCase(req.params.postId);
+   
 
-        if (storedTitle === requestedTitle) {
-            res.render("post", {
-                title: post.title,
-                content: post.content
-            });
-        }
+    Blog.findOne({
+      id:requestedId
+    }, (error, foundPost) => {
+      res.render("post", {
+        title: foundPost.title,
+        content: foundPost.body
+      });
     });
 
 });

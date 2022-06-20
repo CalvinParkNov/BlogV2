@@ -1,14 +1,14 @@
-
 <%- include("partials/header"); -%>
     <h1>Home</h1>
 
+    <%posts.forEach((elements) => {%>
+        <h1><%=elements.title%></h1>
 
-    <h1>Title comes here</h1>
-    <p>
-    Body Comes here
+        <p>
+            <%=elements.body.substring(0,20);%>
+            ...
+            <a href="/posts/<%=elements._id%>">Read More</a>
+        </p>
+        <%});%>
 
-    </p>
-
-
-
-<%- include("partials/footer"); -%>
+            <%- include("partials/footer"); -%>
